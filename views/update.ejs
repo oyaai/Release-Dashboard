@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Update Release Project</title>
+  <link rel="stylesheet" type="text/css" href="/styles.css" />
+</head>
+<body>
+  <div class="form-container">
+    <h2>Update Release Project</h2>
+    <div align="right"> <a href="/release">release</a></div>
+    <form action="/update/<%= record._id %>" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <label for="projectName">Project Name</label>
+        <input type="text" id="projectName" name="projectName" value="<%= record.projectName %>" required>
+
+        <label for="deploymentDate">Deployment Date</label>
+        <input type="date" id="deploymentDate" name="deploymentDate" value="<%= record.deploymentDate.toISOString().split('T')[0] %>" required>
+
+        <label for="txtcomponents">Components</label>
+        <textarea id="txtcomponents" name="txtcomponents" rows="3"><%= record.txtcomponents %></textarea>
+      </fieldset>
+
+      <fieldset>
+        <label for="uatResult">UAT Result</label>
+        <select id="uatResult" name="uatResult" required>
+          <option value="">-- เลือกผลการทดสอบ --</option>
+          <option value="Pass" <%= record.uatResult === 'Pass' ? 'selected' : '' %>>Pass</option>
+          <option value="Fail" <%= record.uatResult === 'Fail' ? 'selected' : '' %>>Fail</option>
+          <option value="Pending" <%= record.uatResult === 'Pending' ? 'selected' : '' %>>Pending</option>
+        </select>
+        <label for="uploadfileUAT">Upload UAT Result (ใหม่ถ้ามี)</label>
+        <input type="file" name="uploadfileUAT" id="uploadfileUAT">
+      </fieldset>
+
+      <label for="projectManager">Project Manager</label>
+      <input type="text" id="projectManager" name="projectManager" value="<%= record.projectManager %>">
+
+      <label for="saOwner">SA Owner</label>
+      <input type="text" id="saOwner" name="saOwner" value="<%= record.saOwner %>">
+
+      <label for="fileuploadIVT">Integration Verify Test (ใหม่ถ้ามี)</label>
+      <input type="file" id="fileuploadIVT" name="fileuploadIVT" multiple>
+
+      <label for="txtContactPoint">Send Credential To. (e-mail)</label>
+      <div id="email-container">
+        <% if (record.credentialEmails && record.credentialEmails.length > 0) { %>
+          <% record.credentialEmails.forEach((emailObj, index) => { %>
+            <input type="text" name="txtConsumerName[]" placeholder="uchoose-uchooseapp" value="<%= emailObj.consumer || '' %>">
+            <input type="email" name="txtContactPoint[]" placeholder="example@example.com" value="<%= emailObj.email %>">
+            <br/><br/>
+          <% }) %>
+        <% } else { %>
+          <input type="text" name="txtConsumerName[]" placeholder="uchoose-uchooseapp">
+          <input type="email" name="txtContactPoint[]" placeholder="example@example.com">
+        <% } %>
+      </div>
+      <button type="button" onclick="addEmailRow()">+ เพิ่มผู้รับ</button>
+
+      <script>
+        function addEmailRow() {
+          const container = document.getElementById("email-container");
+          const input1 = document.createElement("input");
+          const input2 = document.createElement("input");
+          input1.type = "email";
+          input1.name = "txtContactPoint[]";
+          input1.placeholder = "example@example.com";
+
+          input2.type = "text";
+          input2.name = "txtConsumerName[]";
+          input2.placeholder = "uchoose-uchooseapp";
+
+          container.appendChild(document.createElement("br"));
+          container.appendChild(document.createElement("br"));
+          container.appendChild(input2);
+          container.appendChild(input1);
+        }
+      </script>
+
+      <button type="submit">บันทึกการแก้ไข</button>
+    </form>
+  </div>
+</body>
+</html>

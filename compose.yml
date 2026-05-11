@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports: 
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root 
+      MONGO_INITDB_ROOT_PASSWORD: mongopass
+      MONGO_INITDB_DATABASE: apiinfogate
+    volumes:
+      - mongo_data:/data/db
+  apiinfogate:
+    image: apiinfogate:latest
+    container_name: apiinfogate
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://root:mongopass@mongo:27017/?authSource=admin
+
+volumes:
+  mongo_data:
+    
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.34.0.0/16
+          gateway: 172.34.0.1  

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Release Project Form</title>
+  <link rel="stylesheet" type="text/css" href="/styles.css" />
+  
+</head>
+<body>
+  <div class="form-container">
+    <h2>Release Project Form</h2>
+    <div align="right"> <a href="/release" >release</a></div>
+    <form action="/submit" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <label for="projectName">Project Name</label>
+        <input type="text" id="projectName" name="projectName" required>
+
+        <label for="deploymentDate">Deployment Date</label>
+        <input type="date" id="deploymentDate" name="deploymentDate" required>
+
+        <label for="txtcomponents">Components</label>
+        <textarea id="txtcomponents" name="txtcomponents" rows="3" placeholder="ระบุ component ที่เกี่ยวข้อง เช่น Backend, Frontend, DB ฯลฯ"></textarea>
+      </fieldset>
+      
+      <fieldset>
+        <label for="uatResult">UAT Result</label>
+        <select id="uatResult" name="uatResult" required>
+          <option value="">-- เลือกผลการทดสอบ --</option>
+          <option value="Pass">Pass</option>
+          <option value="Fail">Fail</option>
+          <option value="Pending">Pending</option>
+        </select>
+        <label for="uploadfileUAT"> Upload UAT Result (*)</label>
+        <input type="file" name="uploadfileUAT" id="uploadfileUAT">
+      </fieldset>
+      
+
+      <label for="projectManager">Project Manager</label>
+      <input type="text" id="projectManager" name="projectManager">
+
+      <label for="saOwner">SA Owner</label>
+      <input type="text" id="saOwner" name="saOwner">
+
+      <label for="fileuploadIVT">Integration Verify Test</label>
+      <input type="file" id="fileuploadIVT" name="fileuploadIVT">
+
+      <label for="txtContactPoint">Send Credential To. (e-mail)</label>
+      <div id="email-container">
+        <input type="text" name="txtConsumerName[]" placeholder="uchoose-uchooseapp">
+        <input type="email" name="txtContactPoint[]" placeholder="example@example.com">
+      </div>
+      <button type="button" onclick="addEmailRow()">+ เพิ่มผู้รับ</button>
+
+      <script>
+        function addEmailRow() {
+          const container = document.getElementById("email-container");
+          const input1 = document.createElement("input");
+          const input2 = document.createElement("input");
+          input1.type = "email";
+          input1.name = "txtContactPoint[]";
+          input1.placeholder = "example@example.com";
+
+          input2.type = "text";
+          input2.name = "txtConsumerName[]";
+          input2.placeholder = "uchoose-uchooseapp";
+          container.appendChild(document.createElement("br"));
+          container.appendChild(document.createElement("br"));
+          container.appendChild(input2);
+          container.appendChild(input1);
+          
+        }
+      </script>
+
+
+      <button type="submit">Submit</button>
+
+      
+    </form>
+  </div>
+</body>
+</html>

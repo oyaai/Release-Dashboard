@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Release Dashboard</title>
+    <link rel="stylesheet" href="/release.css" />
+  </head>
+  <body>
+    <header>
+      <h1>📦 Release Dashboard</h1>
+      <div align="right">
+        <a href="/">input project</a>
+        <form action="/release" method="get" style="display:inline;">
+          <input type="month" name="month" value="<%= selectedMonth %>">
+          <button type="submit">🔍 Search</button>
+        </form>
+      </div>
+    </header>
+
+    <section class="release-cycle">
+      <h2>Release List</h2>
+
+      <% if (Object.keys(groupedRecords).length === 0) { %>
+        <p>ยังไม่มีข้อมูล</p>
+      <% } else { %>
+        <% Object.keys(groupedRecords).sort().reverse().forEach(month => { %>
+          <h3><%= new Date(month + '-01').toLocaleString('th-TH', { month: 'long', year: 'numeric' }) %></h3>
+          <div class="grid">
+          <% groupedRecords[month].forEach(record => { %>
+            <div class="card">
+              <h3><%= record.projectName %></h3>
+              <p>📁 Module: <%= record.txtcomponents %></p>
+              <p>📅 วันที่ Deploy: <%= new Date(record.deploymentDate).toLocaleDateString('th-TH') %></p>
+              <p>👤 ผู้จัดการโปรเจกต์: <%= record.projectManager %></p>
+              <p>SA Owner: <%= record.saOwner %></p>
+              <p>UAT Result: <%= record.uatResult %></p>
+              <p>
+                อีเมลติดต่อ:
+                <% if (record.credentialEmails && record.credentialEmails.length > 0) { %>
+                  <% record.credentialEmails.forEach(emailObj => { %>
+                    <%= emailObj.email %><br />
+                  <% }) %>
+                <% } else { %> ไม่มีข้อมูลอีเมล <% } %>
+              </p>
+
+              <span class="status">
+                <% if (record.uatResult?.toLowerCase() === "pass") { %> 🟢 Released
+                <% } else if (record.uatResult?.toLowerCase() === "fail") { %> 🔴 Failed
+                <% } else { %> 🟠 Pending <% } %>
+              </span>
+
+              <div class="actions">
+                <form action="/delete/<%= record._id %>" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบโปรเจกต์นี้?');">
+                  <button type="submit">🗑 Delete</button>
+                </form>
+
+                <form action="/update/<%= record._id %>" method="GET">
+                  <button type="submit">✏️ Update</button>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+          </div>
+        <% }) %>
+      <% } %>
+    </section>
+  </body>
+</html>
