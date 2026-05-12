@@ -1,82 +1,846 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Release Project Form</title>
-  <link rel="stylesheet" type="text/css" href="/styles.css" />
-  
-</head>
-<body>
-  <div class="form-container">
-    <h2>Release Project Form</h2>
-    <div align="right"> <a href="/release" >release</a></div>
-    <form action="/submit" method="post" enctype="multipart/form-data">
-      <fieldset>
-        <label for="projectName">Project Name</label>
-        <input type="text" id="projectName" name="projectName" required>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Release Project Form</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        <label for="deploymentDate">Deployment Date</label>
-        <input type="date" id="deploymentDate" name="deploymentDate" required>
+      :root {
+        --bg: #f4f3ef;
+        --surface: #ffffff;
+        --surface-2: #f8f7f4;
+        --border: #e2e0d8;
+        --border-strong: #c8c5bc;
+        --text-primary: #1a1916;
+        --text-secondary: #6b6860;
+        --text-hint: #9e9c95;
+        --accent: #1a4a8a;
+        --accent-light: #eaf0fa;
+        --accent-border: #bbcfe8;
+        --success: #1a6b3c;
+        --success-bg: #eaf5ef;
+        --danger: #8a1a1a;
+        --danger-bg: #faf0f0;
+        --warning: #7a5a0a;
+        --warning-bg: #fdf6e3;
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 16px;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.06);
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --font: "IBM Plex Sans Thai", sans-serif;
+        --mono: "IBM Plex Mono", monospace;
+      }
 
-        <label for="txtcomponents">Components</label>
-        <textarea id="txtcomponents" name="txtcomponents" rows="3" placeholder="ระบุ component ที่เกี่ยวข้อง เช่น Backend, Frontend, DB ฯลฯ"></textarea>
-      </fieldset>
-      
-      <fieldset>
-        <label for="uatResult">UAT Result</label>
-        <select id="uatResult" name="uatResult" required>
-          <option value="">-- เลือกผลการทดสอบ --</option>
-          <option value="Pass">Pass</option>
-          <option value="Fail">Fail</option>
-          <option value="Pending">Pending</option>
-        </select>
-        <label for="uploadfileUAT"> Upload UAT Result (*)</label>
-        <input type="file" name="uploadfileUAT" id="uploadfileUAT">
-      </fieldset>
-      
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 2.5rem 1rem;
+        line-height: 1.6;
+      }
 
-      <label for="projectManager">Project Manager</label>
-      <input type="text" id="projectManager" name="projectManager">
+      .page-wrapper {
+        max-width: 780px;
+        margin: 0 auto;
+      }
 
-      <label for="saOwner">SA Owner</label>
-      <input type="text" id="saOwner" name="saOwner">
+      /* Top bar */
+      .top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--text-hint);
+      }
+      .breadcrumb span {
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+      .breadcrumb svg {
+        width: 14px;
+        height: 14px;
+      }
+      .release-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--accent);
+        text-decoration: none;
+        padding: 7px 14px;
+        border: 1px solid var(--accent-border);
+        border-radius: var(--radius-sm);
+        background: var(--accent-light);
+        transition: opacity 0.15s;
+      }
+      .release-link:hover {
+        opacity: 0.8;
+      }
+      .release-link svg {
+        width: 15px;
+        height: 15px;
+      }
 
-      <label for="fileuploadIVT">Integration Verify Test</label>
-      <input type="file" id="fileuploadIVT" name="fileuploadIVT">
+      /* Card */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
 
-      <label for="txtContactPoint">Send Credential To. (e-mail)</label>
-      <div id="email-container">
-        <input type="text" name="txtConsumerName[]" placeholder="uchoose-uchooseapp">
-        <input type="email" name="txtContactPoint[]" placeholder="example@example.com">
-      </div>
-      <button type="button" onclick="addEmailRow()">+ เพิ่มผู้รับ</button>
+      .card-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: var(--surface);
+      }
+      .header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-md);
+        background: var(--accent-light);
+        border: 1px solid var(--accent-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .header-icon svg {
+        width: 22px;
+        height: 22px;
+        color: var(--accent);
+      }
+      .card-title {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      .card-subtitle {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
 
-      <script>
-        function addEmailRow() {
-          const container = document.getElementById("email-container");
-          const input1 = document.createElement("input");
-          const input2 = document.createElement("input");
-          input1.type = "email";
-          input1.name = "txtContactPoint[]";
-          input1.placeholder = "example@example.com";
+      .card-body {
+        padding: 2rem;
+      }
 
-          input2.type = "text";
-          input2.name = "txtConsumerName[]";
-          input2.placeholder = "uchoose-uchooseapp";
-          container.appendChild(document.createElement("br"));
-          container.appendChild(document.createElement("br"));
-          container.appendChild(input2);
-          container.appendChild(input1);
-          
+      /* Section */
+      .section {
+        margin-bottom: 2rem;
+      }
+      .section:last-child {
+        margin-bottom: 0;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .section-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-sm);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .section-icon svg {
+        width: 14px;
+        height: 14px;
+        color: var(--text-secondary);
+      }
+      .section-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      /* Grid */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem 1.25rem;
+      }
+      .grid-1 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .col-span-2 {
+        grid-column: 1 / -1;
+      }
+
+      /* Fields */
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .field label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+      .field label .req {
+        color: var(--danger);
+        margin-left: 2px;
+      }
+      .field input,
+      .field select,
+      .field textarea {
+        font-family: var(--font);
+        font-size: 14px;
+        color: var(--text-primary);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 9px 12px;
+        width: 100%;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s,
+          background 0.15s;
+        line-height: 1.5;
+      }
+      .field input:hover,
+      .field select:hover,
+      .field textarea:hover {
+        border-color: var(--border-strong);
+      }
+      .field input:focus,
+      .field select:focus,
+      .field textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(26, 74, 138, 0.1);
+        background: var(--surface);
+      }
+      .field textarea {
+        resize: vertical;
+        min-height: 88px;
+      }
+      .field input[type="file"] {
+        padding: 7px 10px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .field input[type="file"]::file-selector-button {
+        font-family: var(--font);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--accent);
+        background: var(--accent-light);
+        border: 1px solid var(--accent-border);
+        border-radius: var(--radius-sm);
+        padding: 4px 10px;
+        cursor: pointer;
+        margin-right: 10px;
+        transition: opacity 0.15s;
+      }
+      .field input[type="file"]::file-selector-button:hover {
+        opacity: 0.8;
+      }
+      .field .hint {
+        font-size: 11.5px;
+        color: var(--text-hint);
+      }
+
+      /* Select wrapper */
+      .select-wrap {
+        position: relative;
+      }
+      .select-wrap select {
+        appearance: none;
+        padding-right: 36px;
+      }
+      .select-wrap .chev {
+        position: absolute;
+        right: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--text-hint);
+      }
+      .select-wrap .chev svg {
+        width: 16px;
+        height: 16px;
+        display: block;
+      }
+
+      /* Status badges in select */
+      .status-hint {
+        display: flex;
+        gap: 8px;
+        margin-top: 6px;
+      }
+      .badge {
+        font-size: 11px;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 20px;
+        letter-spacing: 0.02em;
+      }
+      .badge-pass {
+        background: var(--success-bg);
+        color: var(--success);
+      }
+      .badge-fail {
+        background: var(--danger-bg);
+        color: var(--danger);
+      }
+      .badge-pending {
+        background: var(--warning-bg);
+        color: var(--warning);
+      }
+
+      /* Divider */
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 0.25rem 0 1.75rem;
+      }
+
+      /* Email rows */
+      .email-row {
+        display: grid;
+        grid-template-columns: 180px 1fr 36px;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .email-row input {
+        font-family: var(--font);
+        font-size: 13.5px;
+        color: var(--text-primary);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        width: 100%;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      .email-row input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(26, 74, 138, 0.1);
+      }
+      .email-row input:hover {
+        border-color: var(--border-strong);
+      }
+      .email-col-label {
+        display: grid;
+        grid-template-columns: 180px 1fr 36px;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .email-col-label span {
+        font-size: 11.5px;
+        color: var(--text-hint);
+        padding-left: 2px;
+      }
+
+      .btn-remove {
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--text-hint);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      .btn-remove:hover {
+        background: var(--danger-bg);
+        border-color: #e8bbbb;
+        color: var(--danger);
+      }
+      .btn-remove svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      .btn-add {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--accent);
+        background: var(--accent-light);
+        border: 1px solid var(--accent-border);
+        border-radius: var(--radius-sm);
+        padding: 7px 14px;
+        cursor: pointer;
+        margin-top: 4px;
+        transition: opacity 0.15s;
+      }
+      .btn-add:hover {
+        opacity: 0.8;
+      }
+      .btn-add svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      /* Footer */
+      .card-footer {
+        padding: 1.25rem 2rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .footer-note {
+        font-size: 12px;
+        color: var(--text-hint);
+      }
+      .footer-note span {
+        color: var(--danger);
+      }
+
+      .footer-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn-cancel {
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        background: transparent;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-sm);
+        padding: 9px 20px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .btn-cancel:hover {
+        background: var(--border);
+      }
+
+      .btn-submit {
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--accent);
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 9px 24px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: opacity 0.15s;
+        box-shadow: var(--shadow-sm);
+      }
+      .btn-submit:hover {
+        opacity: 0.88;
+      }
+      .btn-submit svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* Responsive */
+      @media (max-width: 600px) {
+        body {
+          padding: 1rem 0.75rem;
         }
-      </script>
+        .card-header {
+          padding: 1.25rem 1.25rem;
+        }
+        .card-body {
+          padding: 1.25rem;
+        }
+        .card-footer {
+          padding: 1rem 1.25rem;
+          flex-direction: column;
+          gap: 12px;
+          align-items: stretch;
+        }
+        .footer-actions {
+          justify-content: flex-end;
+        }
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .col-span-2 {
+          grid-column: 1;
+        }
+        .email-row {
+          grid-template-columns: 1fr 36px;
+        }
+        .email-row input:first-child {
+          grid-column: 1 / -1;
+        }
+        .email-col-label {
+          grid-template-columns: 1fr 36px;
+        }
+        .email-col-label span:first-child {
+          grid-column: 1 / -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <div class="top-bar">
+        <div class="breadcrumb">
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              d="M2 8h12M8 2l6 6-6 6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Projects
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              d="M6 4l4 4-4 4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>New Release</span>
+        </div>
+        <a href="/release" class="release-link">
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              d="M3 8H13M8 3l5 5-5 5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Release history
+        </a>
+      </div>
 
+      <div class="card">
+        <!-- Header -->
+        <div class="card-header">
+          <div class="header-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Release Project Form</div>
+            <div class="card-subtitle">
+              กรอกข้อมูลเพื่อส่งคำขอ deploy และแจ้งเวียน credential
+            </div>
+          </div>
+        </div>
 
-      <button type="submit">Submit</button>
+        <!-- Body -->
+        <div class="card-body">
+          <form action="/submit" method="post" enctype="multipart/form-data">
+            <!-- Section 1: Project Info -->
+            <div class="section">
+              <div class="section-header">
+                <div class="section-icon">
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <rect x="2" y="2" width="12" height="12" rx="2" />
+                    <path d="M5 6h6M5 9h4" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="section-title">ข้อมูลโปรเจกต์</div>
+              </div>
 
-      
-    </form>
-  </div>
-</body>
+              <div class="grid-2">
+                <div class="field">
+                  <label for="projectName"
+                    >Project Name <span class="req">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="projectName"
+                    name="projectName"
+                    placeholder="ชื่อโปรเจกต์"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="deploymentDate"
+                    >Deployment Date <span class="req">*</span></label
+                  >
+                  <input
+                    type="date"
+                    id="deploymentDate"
+                    name="deploymentDate"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="projectManager">Project Manager</label>
+                  <input
+                    type="text"
+                    id="projectManager"
+                    name="projectManager"
+                    placeholder="ชื่อ PM"
+                  />
+                </div>
+                <div class="field">
+                  <label for="saOwner">SA Owner</label>
+                  <input
+                    type="text"
+                    id="saOwner"
+                    name="saOwner"
+                    placeholder="ชื่อ SA"
+                  />
+                </div>
+                <div class="field col-span-2">
+                  <label for="txtcomponents">Components ที่เกี่ยวข้อง</label>
+                  <textarea
+                    id="txtcomponents"
+                    name="txtcomponents"
+                    placeholder="ระบุ component เช่น Backend, Frontend, DB ฯลฯ"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Section 2: UAT -->
+            <div class="section">
+              <div class="section-header">
+                <div class="section-icon">
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <path
+                      d="M2 8l4 4 8-8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div class="section-title">UAT &amp; Testing</div>
+              </div>
+
+              <div class="grid-2">
+                <div class="field">
+                  <label for="uatResult"
+                    >UAT Result <span class="req">*</span></label
+                  >
+                  <div class="select-wrap">
+                    <select id="uatResult" name="uatResult" required>
+                      <option value="">— เลือกผลการทดสอบ —</option>
+                      <option value="Pass">Pass</option>
+                      <option value="Fail">Fail</option>
+                      <option value="Pending">Pending</option>
+                    </select>
+                    <div class="chev">
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                      >
+                        <path
+                          d="M4 6l4 4 4-4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="status-hint">
+                    <span class="badge badge-pass">Pass</span>
+                    <span class="badge badge-fail">Fail</span>
+                    <span class="badge badge-pending">Pending</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="uploadfileUAT"
+                    >Upload UAT Result <span class="req">*</span></label
+                  >
+                  <input type="file" name="uploadfileUAT" id="uploadfileUAT" />
+                  <span class="hint">PDF, Excel, หรือรูปภาพ</span>
+                </div>
+                <div class="field col-span-2">
+                  <label for="fileuploadIVT"
+                    >Integration Verify Test (IVT)</label
+                  >
+                  <input type="file" id="fileuploadIVT" name="fileuploadIVT" />
+                  <span class="hint">แนบไฟล์ผลการทดสอบ integration</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Section 3: Email -->
+            <div class="section">
+              <div class="section-header">
+                <div class="section-icon">
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <rect x="1" y="4" width="14" height="10" rx="1.5" />
+                    <path
+                      d="M1 5l7 5 7-5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div class="section-title">Send Credential To (E-mail)</div>
+              </div>
+
+              <div class="email-col-label">
+                <span>Consumer name</span>
+                <span>E-mail address</span>
+                <span></span>
+              </div>
+              <div id="email-container"></div>
+              <button type="button" class="btn-add" onclick="addEmailRow()">
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M8 3v10M3 8h10" stroke-linecap="round" />
+                </svg>
+                เพิ่มผู้รับ
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer">
+          <div class="footer-note"><span>*</span> จำเป็นต้องกรอก</div>
+          <div class="footer-actions">
+            <button type="button" class="btn-cancel" onclick="history.back()">
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              class="btn-submit"
+              form="release-form"
+              onclick="document.querySelector('form').submit()"
+            >
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M3 8h10M9 4l4 4-4 4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function addEmailRow(name, email) {
+        const container = document.getElementById("email-container");
+        const row = document.createElement("div");
+        row.className = "email-row";
+        row.innerHTML = `
+        <input type="text" name="txtConsumerName[]" placeholder="uchoose-app" value="${name || ""}">
+        <input type="email" name="txtContactPoint[]" placeholder="example@example.com" value="${email || ""}">
+        <button type="button" class="btn-remove" onclick="this.closest('.email-row').remove()" title="ลบแถวนี้">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4l8 8M12 4l-8 8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      `;
+        container.appendChild(row);
+      }
+
+      // Add default row
+      addEmailRow("uchoose-uchooseapp", "");
+    </script>
+  </body>
 </html>

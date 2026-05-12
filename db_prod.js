@@ -1,17 +1,17 @@
-const { Pool } = require("pg");
+const { Pool } = require('pg');
 
 class Database {
   constructor() {
     this.pool = new Pool({
-      user: "root",
-      host: "localhost:27017",
-      database: "apiinfogate",
-      password: "example",
-      port: 27017,
+      user: 'kscapics',       
+      host: 'aycapsu01ts330.aycap.bayad.co.th',          
+      database: 'kscapics-db-dev',   
+      password: 'P@ssw0rd!@#$',   
+      port: 5435,                 
     });
 
-    this.pool.on("error", (err) => {
-      console.error("Unexpected error on idle client", err);
+    this.pool.on('error', (err) => {
+      console.error('Unexpected error on idle client', err);
       process.exit(-1);
     });
   }
@@ -20,7 +20,7 @@ class Database {
     const start = Date.now();
     const res = await this.pool.query(text, params);
     const duration = Date.now() - start;
-    console.log("executed query", { text, duration, rows: res.rowCount });
+    console.log('executed query', { text, duration, rows: res.rowCount });
     return res;
   }
 

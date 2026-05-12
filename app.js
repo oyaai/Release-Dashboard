@@ -2,21 +2,22 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
-const multer = require('multer');
+const multer = require("multer");
+
+require("dotenv").config();
 
 const connectDB = require("./db_mongo");
 const InfoGate = require("./models/InfoGate");
 
 const app = express();
-const logFilePath = path.join(__dirname, "submit.log")
-
+const logFilePath = path.join(__dirname, "submit.log");
 
 connectDB();
 
 app.set("view engine", "ejs");
 //app.use(express.static("views"));
 app.use(express.static(path.join(__dirname, "views")));
-app.use(bodyParser.urlencoded({ extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -24,52 +25,51 @@ const upload = multer({ storage });
 const port = 5432;
 
 const cpUpload = upload.fields([
-  { name: "uploadfileUAT", maxCount: 1},
-  { name: "fileuploadIVT", maxCount: 10 }
-])
+  { name: "uploadfileUAT", maxCount: 1 },
+  { name: "fileuploadIVT", maxCount: 10 },
+]);
 
-
-app.get("/", (req, res)=>{
-    res.render("index", { message: message.home });
+app.get("/", (req, res) => {
+  res.render("index", { message: message.home });
 });
 
-
-const moment = require("moment"); 
+const moment = require("moment");
 
 app.get("/release", async (req, res) => {
-    try {
-      const filterMonth = req.query.month; // รับพารามิเตอร์เดือนจาก URL
-      const allRecords = await InfoGate.find().sort({ deploymentDate: -1 }).lean();
-      //const records = await InfoGate.find().sort({ deploymentDate: -1 }).lean();
+  try {
+    const filterMonth = req.query.month; // รับพารามิเตอร์เดือนจาก URL
+    const allRecords = await InfoGate.find()
+      .sort({ deploymentDate: -1 })
+      .lean();
+    //const records = await InfoGate.find().sort({ deploymentDate: -1 }).lean();
 
-      const groupedRecords = {};
-      allRecords.forEach((record) => {
-        const month = moment(record.deploymentDate).format("YYYY-MM");
-        if (!groupedRecords[month]) groupedRecords[month] = [];
-        groupedRecords[month].push(record);
-      });
+    const groupedRecords = {};
+    allRecords.forEach((record) => {
+      const month = moment(record.deploymentDate).format("YYYY-MM");
+      if (!groupedRecords[month]) groupedRecords[month] = [];
+      groupedRecords[month].push(record);
+    });
 
-      let displayedRecords = groupedRecords;
-      if (filterMonth) {
-        displayedRecords = {
-          [filterMonth]: groupedRecords[filterMonth] || [],
-        };
-      }
-
-      res.render("release", {
-        groupedRecords: displayedRecords,
-        selectedMonth: filterMonth || "",
-       });
-    } catch (error) {
-      console.error("Error fetching release records: ", error);
-      res.status(500).send("Cannot load Data");
+    let displayedRecords = groupedRecords;
+    if (filterMonth) {
+      displayedRecords = {
+        [filterMonth]: groupedRecords[filterMonth] || [],
+      };
     }
+
+    res.render("release", {
+      groupedRecords: displayedRecords,
+      selectedMonth: filterMonth || "",
+    });
+  } catch (error) {
+    console.error("Error fetching release records: ", error);
+    res.status(500).send("Cannot load Data");
+  }
 });
 
 app.get("/search", (req, res) => {
-    res.render("search", { title: "Search" });
+  res.render("search", { title: "Search" });
 });
-
 
 app.post("/delete/:id", async (req, res) => {
   try {
@@ -81,7 +81,6 @@ app.post("/delete/:id", async (req, res) => {
     res.status(500).send("ไม่สามารถลบข้อมูลได้");
   }
 });
-
 
 app.get("/update/:id", async (req, res) => {
   try {
@@ -97,13 +96,13 @@ app.get("/update/:id", async (req, res) => {
 });
 
 app.post("/update/:id", cpUpload, async (req, res) => {
-  const { 
-    projectName, 
-    deploymentDate, 
-    txtcomponents, 
-    uatResult, 
-    projectManager, 
-    saOwner 
+  const {
+    projectName,
+    deploymentDate,
+    txtcomponents,
+    uatResult,
+    projectManager,
+    saOwner,
   } = req.body;
 
   const contactPoints = Array.isArray(req.body.txtContactPoint)
@@ -123,11 +122,12 @@ app.post("/update/:id", cpUpload, async (req, res) => {
   };
 
   if (req.files.uploadfileUAT?.[0]) {
-    updateData.uatResultFile = req.files.uploadfileUAT[0].buffer.toString("base64");
+    updateData.uatResultFile =
+      req.files.uploadfileUAT[0].buffer.toString("base64");
   }
 
   if (req.files.fileuploadIVT) {
-    updateData.ivtFiles = req.files.fileuploadIVT.map(file => ({
+    updateData.ivtFiles = req.files.fileuploadIVT.map((file) => ({
       fileBase64: file.buffer.toString("base64"),
     }));
   }
@@ -139,11 +139,10 @@ app.post("/update/:id", cpUpload, async (req, res) => {
     console.error("Error updating record:", err);
     res.status(500).render("pop-up", {
       message: "ไม่สามารถอัปเดตข้อมูลได้",
-      redirectUrl: "/release"
+      redirectUrl: "/release",
     });
   }
 });
-
 
 ////////////// Start Test Connection /////////////
 /* async function testQuery() {
@@ -157,84 +156,85 @@ app.post("/update/:id", cpUpload, async (req, res) => {
 testQuery(); */
 ////////////// End Test Connection /////////////
 
-function writelog(message){
+function writelog(message) {
   const timestamp = new Date().toISOString();
   const fullMessage = `[${timestamp}] ${message}\n`;
 
   console.log("Writing log:", fullMessage);
 
   fs.appendFile(logFilePath, fullMessage, (err) => {
-    if(err) console.error("ไม่สามารถเขียน log ได้!!", err);
+    if (err) console.error("ไม่สามารถเขียน log ได้!!", err);
   });
 }
 
 app.post("/submit", cpUpload, async (req, res) => {
-    const { 
-      projectName, 
-      deploymentDate, 
-      txtcomponents, 
-      uatResult, 
-      projectManager, 
-      saOwner, } = req.body;
-      console.log(" Files: ", req.files);
-      const file = req.files.uploadfileUAT?.[0];
+  const {
+    projectName,
+    deploymentDate,
+    txtcomponents,
+    uatResult,
+    projectManager,
+    saOwner,
+  } = req.body;
+  console.log(" Files: ", req.files);
+  const file = req.files.uploadfileUAT?.[0];
 
-      if (!file) {
-        return res.status(400).send(" Can't get files UAT");
-      }
-    
-    const contactPoints = Array.isArray(req.body.txtContactPoint)
-      ? req.body.txtContactPoint
-      : [req.body.txtContactPoint];
+  if (!file) {
+    return res.status(400).send(" Can't get files UAT");
+  }
 
-    const uatResultFile = req.files.uploadfileUAT?.[0]
-      ? req.files.uploadfileUAT[0].buffer.toString('base64')
-      : null;
-    
-    const ivtFiles = req.files.fileuploadIVT?.map((file) =>
-      ({ fileBase64: file.buffer.toString('base64'), })) || [];
+  const contactPoints = Array.isArray(req.body.txtContactPoint)
+    ? req.body.txtContactPoint
+    : [req.body.txtContactPoint];
 
-    const credentialEmails = contactPoints.map((email) => ({ email }));
-    
-    try {
-        const newRecord = new InfoGate({
-          projectName,
-          deploymentDate,
-          txtcomponents,
-          uatResult,
-          uatResultFile,
-          projectManager,
-          saOwner,
-          ivtFiles,
-          credentialEmails,
-        });
-        
-        await newRecord.save();
+  const uatResultFile = req.files.uploadfileUAT?.[0]
+    ? req.files.uploadfileUAT[0].buffer.toString("base64")
+    : null;
 
-        const logMsg = `บันทึกสำเร็จ : ${projectName}`;
-        writelog(logMsg);
-        writelog("========");
-        //console.log("ข้อมูลถูกบันทึก:", result.rows[0]);
-        console.log("Submit information : ", req.body);
-        //return res.render("release", { title: `บันทึกข้อมูลเรียบร้อย: ${projectName}` });
-        res.redirect("/release")
+  const ivtFiles =
+    req.files.fileuploadIVT?.map((file) => ({
+      fileBase64: file.buffer.toString("base64"),
+    })) || [];
 
-    } catch (error) {
-        const errMsg = `เกิดข้อผิดพลาดในการบันทึกข้อมูล: ${error.message}`;
-        //res.status(500).send("ไม่สามารถบันทึกข้อมูลได้");
-        
-        writelog(errMsg);
-        writelog("========");
-        console.error("Submit error: ", error);
-        //console.error(errMsg);
-        res.status(500).render("pop-up", {
-            message: "ไม่สามารถบันทึกข้อมูลได้",
-            redirectUrl: "/"
-        });
-    }
+  const credentialEmails = contactPoints.map((email) => ({ email }));
+
+  try {
+    const newRecord = new InfoGate({
+      projectName,
+      deploymentDate,
+      txtcomponents,
+      uatResult,
+      uatResultFile,
+      projectManager,
+      saOwner,
+      ivtFiles,
+      credentialEmails,
+    });
+
+    await newRecord.save();
+
+    const logMsg = `บันทึกสำเร็จ : ${projectName}`;
+    writelog(logMsg);
+    writelog("========");
+    //console.log("ข้อมูลถูกบันทึก:", result.rows[0]);
+    console.log("Submit information : ", req.body);
+    //return res.render("release", { title: `บันทึกข้อมูลเรียบร้อย: ${projectName}` });
+    res.redirect("/release");
+  } catch (error) {
+    const errMsg = `เกิดข้อผิดพลาดในการบันทึกข้อมูล: ${error.message}`;
+    //res.status(500).send("ไม่สามารถบันทึกข้อมูลได้");
+
+    writelog(errMsg);
+    writelog("========");
+    console.error("Submit error: ", error);
+    //console.error(errMsg);
+    res.status(500).render("pop-up", {
+      message: "ไม่สามารถบันทึกข้อมูลได้",
+      redirectUrl: "/",
+    });
+  }
 });
 
-
 app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+  console.log(`Server is running at http://localhost:${port}`);
 });
